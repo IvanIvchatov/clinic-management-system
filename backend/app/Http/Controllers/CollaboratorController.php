@@ -35,10 +35,8 @@ class CollaboratorController extends BaseController
         return $this->sendResponse(new CollaboratorResource($collaborator), 'Post created.');
     }
 
-    public function update(Request $request, Collaborator $service)
+    public function update(Request $request, Collaborator $collaborator)
     {
-//        var_dump($input);
-        exit();
         $input = $request->all();
         $validator = Validator::make($input, [
             'name' => 'required',
