@@ -12,12 +12,12 @@ Route::post('login', [AuthController::class, 'authenticate']);
 Route::post('register', [AuthController::class, 'register']);
 Route::get('logout', [AuthController::class, 'logout']);
 
-// Route::group(['middleware' => ['jwt.verify','role:ROLE_ADMIN']], function() {
+Route::group(['middleware' => ['jwt.verify']], function() {
     Route::resource('users', UserController::class);
     Route::resource('centers', CentersController::class);
     Route::resource('services', ServicesController::class);
     Route::resource('collaborator', CollaboratorController::class);
-// });
+});
 
 // Route::get('services', [ServicesController::class, 'index']);
 // Route::post('services', [ServicesController::class, 'store']);
