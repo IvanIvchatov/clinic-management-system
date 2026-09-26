@@ -7,8 +7,8 @@ Full-stack project: **REST API on Laravel** + **SPA on Vue 3**.
 
 ## Features
 
-- JWT authentication (login / registration / logout) and role-based access (`ROLE_ADMIN` middleware)
-- Centers with addresses, services, collaborators (staff) — full CRUD via REST API
+- JWT authentication (login / registration / logout); all data endpoints are protected by a JWT middleware, token attached to requests by an Axios interceptor
+- REST API for centers (with addresses), services, staff (collaborators) and users
 - Unified JSON response format through a base controller and API Resources
 - Vue SPA pages: clients, services, staff, salary, cash desk, settings
 - Client-side routing with auth / guest guards, state management with Vuex
