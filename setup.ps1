@@ -48,12 +48,13 @@ if (-not (Test-Path $composer)) {
 Step 'Backend: installing PHP dependencies (a few minutes)'
 Set-Location (Join-Path $root 'backend')
 if (-not (Test-Path '.env')) { Copy-Item '.env.example' '.env' }
+# SQLite file must exist before composer runs artisan package:discover
+$db = Join-Path (Get-Location) 'database\database.sqlite'
+if (-not (Test-Path $db)) { New-Item -ItemType File -Path $db | Out-Null }
 php $composer update --no-interaction --with-all-dependencies
 if ($LASTEXITCODE -ne 0) { throw 'composer update failed' }
 
 Step 'Backend: database, keys and demo data'
-$db = Join-Path (Get-Location) 'database\database.sqlite'
-if (-not (Test-Path $db)) { New-Item -ItemType File -Path $db | Out-Null }
 php artisan key:generate --force
 php artisan jwt:secret --force
 php artisan migrate:fresh --seed --force
