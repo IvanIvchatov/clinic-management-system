@@ -1,256 +1,189 @@
 <template>
-  <!--    <div style="margin-top:100px">-->
-  <!--     	<h1>Страница клиентов</h1>-->
-  <!--    </div>-->
-
-  <div class="bottom-menu">
-    <div @click="add"><i class="fas fa-user-plus"></i>Новый клиент</div>
-    <div :class="{ disabled: !isEdit }" @click="edit">
-      <i class="fas fa-user-edit"></i>Редактировать клиента
-    </div>
-    <div><i class="fas fa-money-check-alt"></i>Продажа</div>
-    <div><i class="fas fa-fighter-jet"></i>Быстрая Продажа</div>
-    <div><i class="fas fa-users"></i>Сейчас в самотужке</div>
-    <div><i class="fas fa-wallet"></i>Положить на счет</div>
-    <div><i class="fas fa-hand-holding-usd"></i>Снять со счета</div>
-  </div>
-  <div class="left">
-    <div class="search">
-      <input type="text" placeholder="поиск" />
-    </div>
-    <div class="clients-list">
-      <h4 v-if="currentCenter">текущий центр {{currentCenter.name}}</h4>
-      <h4>ФИО</h4>
-      <ul>
-        <li
-          @click="setCurrentUser(user)"
-          v-for="(user, index) in $store.state.users.users"
-          :key="index"
-        >
-          <i class="far fa-user"></i> {{ user.secondName }} {{ user.name }}
-          {{ user.patronymic }}
-        </li>
-      </ul>
-    </div>
-  </div>
-  <div class="right clients-right">
-    <div class="user" v-show="currentUser.show">
-      <h3>{{ h3 }} {{mode}}</h3>
-      <div class="user-info">
-        <div><button class="but-delete">Удалить</button></div>
-        <table>
-          <tr>
-            <td>Фамилия</td>
-            <input
-              v-if="mode == 'edit' || mode == 'add'"
-              v-model="currentUser.secondName"
-            />
-            <td v-else>{{ currentUser.secondName }}</td>
-          </tr>
-
-          <tr>
-            <td>Имя</td>
-            <input
-              v-if="mode == 'edit' || mode == 'add'"
-              v-model="currentUser.name"
-            />
-            <td v-else>{{ currentUser.name }}</td>
-          </tr>
-
-          <tr>
-            <td>Отчество</td>
-            <input
-              v-if="mode == 'edit' || mode == 'add'"
-              v-model="currentUser.patronymic"
-            />
-            <td v-else>{{ currentUser.patronymic }}</td>
-          </tr>
-          <tr>
-            <td>email</td>
-            <input
-              v-if="mode == 'edit' || mode == 'add'"
-              v-model="currentUser.email"
-            />
-            <td v-else>{{ currentUser.email }}</td>
-          </tr>
-          <tr>
-            <td>номер телефона</td>
-            <input
-              v-if="mode == 'edit' || mode == 'add'"
-              v-model="currentUser.phone"
-            />
-            <td v-else>{{ currentUser.phone }}</td>
-          </tr>
-
-           <tr>
-            <td>День рождения</td>
-            <input type="date"
-              v-if="mode == 'edit' || mode == 'add'"
-              v-model="currentUser.birthday"
-            />
-            <td v-else>{{ currentUser.birthday }}</td>
-          </tr>
-
-          <tr>
-            <td>центры</td>
-            <td>
-              {{ currentUser.centers.map((center) => center.name).join() }}
-            </td>
-          </tr>
-
-          <tr>
-            <td>город</td>
-            <input
-              v-if="mode == 'edit' || mode == 'add'"
-              v-model="currentUser.address.city"
-            />
-            <td v-else>{{ currentUser.address.city }}</td>
-          </tr>
-
-          <tr>
-            <td>улица</td>
-            <input
-              v-if="mode == 'edit' || mode == 'add'"
-              v-model="currentUser.address.street"
-            />
-            <td v-else>{{ currentUser.address.street }}</td>
-          </tr>
-
-          <tr>
-            <td>номер</td>
-            <input
-              v-if="mode == 'edit' || mode == 'add'"
-              v-model="currentUser.address.number"
-            />
-            <td v-else>{{ currentUser.address.number }}</td>
-          </tr>
-
-          <tr>
-            <td>индекс</td>
-            <input
-              v-if="mode == 'edit' || mode == 'add'"
-              v-model="currentUser.address.zipCode"
-            />
-            <td v-else>{{ currentUser.address.zipCode }}</td>
-          </tr>
-        </table>
+  <div>
+    <div class="toolbar">
+      <div class="toolbar-left">
+        <div class="search" style="width: 320px">
+          <font-awesome-icon icon="search" />
+          <input class="input" v-model="query" placeholder="Search by name, email or phone" />
+        </div>
+        <span class="chip" v-if="current"><font-awesome-icon icon="hospital" /> {{ current.name }}</span>
+      </div>
+      <div class="toolbar-right">
+        <button class="btn btn-primary" @click="startAdd"><font-awesome-icon icon="user-plus" /> New client</button>
       </div>
     </div>
 
-    <!-- <div class="user-extra">
-      <div class="extra-info">
-        <h2>Примечания</h2><br>
-        <span>Какая то еще инф</span>
-      </div><br>
-      <div class="last-visits">
-        <table>
-          <tr>
-            <td>19.28.27</td>
-            <td>лфк</td>
-          </tr>
-          <tr>
-            <td>17.30.27</td>
-            <td>масаж</td>
-          </tr>
-          <tr>
-            <td>19.28.37</td>
-            <td>бассейн</td>
-          </tr>
-          <tr>
-            <td>19.28.37</td>
-            <td>прыжки в воду с 10 метров</td>
-          </tr>
-          <tr>
-            <td>19.28.37</td>
-            <td>литер бол </td>
-          </tr>
-        </table>
+    <div class="split">
+      <div class="card">
+        <div class="card-head">
+          <h3>All clients</h3>
+          <span class="badge">{{ filtered.length }}</span>
+        </div>
+        <ul class="list scroll-y">
+          <li v-for="u in filtered" :key="u.id" class="list-item" :class="{ active: selected && selected.id === u.id }" @click="select(u)">
+            <div class="avatar" :style="{ background: colorFor(u.email) }">{{ initials(u.name, u.secondName) }}</div>
+            <div style="min-width:0">
+              <div class="li-title">{{ u.secondName }} {{ u.name }}</div>
+              <div class="li-sub">{{ u.phone || u.email }}</div>
+            </div>
+            <font-awesome-icon icon="chevron-right" class="li-right" />
+          </li>
+          <li v-if="!filtered.length" class="empty">No clients found</li>
+        </ul>
       </div>
 
+      <!-- view -->
+      <div class="card card-pad" v-if="mode === 'view' && selected">
+        <div class="profile-head">
+          <div class="avatar avatar-lg" :style="{ background: colorFor(selected.email) }">{{ initials(selected.name, selected.secondName) }}</div>
+          <div>
+            <h2>{{ selected.secondName }} {{ selected.name }} {{ selected.patronymic }}</h2>
+            <div class="muted">Client since {{ selected.created_at }}</div>
+          </div>
+          <div style="margin-left:auto; display:flex; gap:8px">
+            <button class="btn" @click="startEdit"><font-awesome-icon icon="pen" /> Edit</button>
+            <button class="btn btn-danger" @click="removeClient">
+              <font-awesome-icon icon="trash-alt" /> {{ confirmDelete ? 'Confirm delete' : 'Delete' }}
+            </button>
+          </div>
+        </div>
 
+        <div class="section-title">Contacts</div>
+        <dl class="kv">
+          <dt><font-awesome-icon icon="envelope" /> Email</dt><dd>{{ selected.email }}</dd>
+          <dt><font-awesome-icon icon="phone" /> Phone</dt><dd>{{ selected.phone || '—' }}</dd>
+          <dt><font-awesome-icon icon="birthday-cake" /> Birthday</dt>
+          <dd>{{ formatDate(selected.birthday) }}<span v-if="age(selected.birthday)" class="faint"> · {{ age(selected.birthday) }} years</span></dd>
+          <dt><font-awesome-icon icon="map-marker-alt" /> Address</dt><dd>{{ address(selected) }}</dd>
+        </dl>
 
-    </div> -->
-    <button @click="saveOrEditUser" v-show="mode == 'edit' || mode == 'add'">
-      {{ mode == "edit" ? "Сохранить" : "Добавить" }}
-    </button>
+        <div class="section-title" style="margin-top:24px">Centers</div>
+        <div style="display:flex; gap:8px; flex-wrap:wrap">
+          <span v-for="c in selected.centers" :key="c.id" class="chip chip-primary"><font-awesome-icon icon="hospital" /> {{ c.name }}</span>
+          <span v-if="!selected.centers.length" class="faint">Not assigned</span>
+        </div>
+      </div>
+
+      <!-- add / edit -->
+      <div class="card card-pad" v-else-if="mode !== 'view'">
+        <div class="profile-head">
+          <h2>{{ mode === 'add' ? 'New client' : 'Edit client' }}</h2>
+        </div>
+        <form @submit.prevent="save">
+          <div class="section-title">Personal</div>
+          <div class="form-grid">
+            <label class="field"><span>Last name</span><input class="input" v-model="form.secondName" /></label>
+            <label class="field"><span>First name *</span><input class="input" v-model="form.name" required /></label>
+            <label class="field"><span>Middle name</span><input class="input" v-model="form.patronymic" /></label>
+            <label class="field"><span>Birthday</span><input class="input" type="date" v-model="form.birthday" /></label>
+            <label class="field"><span>Email *</span><input class="input" type="email" v-model="form.email" required /></label>
+            <label class="field"><span>Phone</span><input class="input" v-model="form.phone" placeholder="+380 …" /></label>
+          </div>
+
+          <div class="section-title">Address</div>
+          <div class="form-grid">
+            <label class="field"><span>City</span><input class="input" v-model="form.address.city" /></label>
+            <label class="field"><span>Street</span><input class="input" v-model="form.address.street" /></label>
+            <label class="field"><span>Building</span><input class="input" v-model="form.address.number" /></label>
+            <label class="field"><span>ZIP code</span><input class="input" v-model="form.address.zipCode" /></label>
+          </div>
+
+          <div class="section-title">Centers</div>
+          <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:18px">
+            <label v-for="c in centers" :key="c.id" class="chip" :class="{ 'chip-primary': form.center_ids.includes(c.id) }" style="cursor:pointer">
+              <input type="checkbox" :value="c.id" v-model="form.center_ids" style="display:none" />
+              <font-awesome-icon icon="hospital" /> {{ c.name }}
+            </label>
+          </div>
+
+          <div class="form-actions">
+            <button type="button" class="btn" @click="cancel">Cancel</button>
+            <button class="btn btn-primary">{{ mode === 'add' ? 'Create client' : 'Save changes' }}</button>
+          </div>
+        </form>
+      </div>
+
+      <div class="card empty" v-else>
+        <font-awesome-icon icon="user" />
+        <div>Select a client to see the details</div>
+      </div>
+    </div>
   </div>
 </template>
 
 <script>
-  import User from "../../models/user";
-  export default {
-    data() {
-      return {
-        currentUser: new User({}),
-        mode: "see",
-        isEdit:false,
+import { initials, colorFor, age, formatDate } from '../../utils';
+
+const blank = () => ({
+  name: '', secondName: '', patronymic: '', email: '', phone: '', birthday: '',
+  address: { city: '', street: '', number: '', zipCode: '' }, center_ids: [],
+});
+
+export default {
+  data() {
+    return { query: '', selectedId: null, mode: 'view', form: blank(), confirmDelete: false };
+  },
+  computed: {
+    current() { return this.$store.state.centers.current; },
+    centers() { return this.$store.state.centers.items; },
+    clients() {
+      const all = this.$store.state.users.items;
+      return this.current ? all.filter(u => u.centers.some(c => c.id === this.current.id)) : all;
+    },
+    filtered() {
+      const q = this.query.trim().toLowerCase();
+      if (!q) return this.clients;
+      return this.clients.filter(u =>
+        [u.name, u.secondName, u.patronymic, u.email, u.phone].filter(Boolean).join(' ').toLowerCase().includes(q));
+    },
+    selected() { return this.$store.state.users.items.find(u => u.id === this.selectedId) || null; },
+  },
+  watch: {
+    // keep a client selected: first one in the (filtered) list
+    filtered: {
+      immediate: true,
+      handler(list) {
+        if (this.mode === 'view' && list.length && !list.some(u => u.id === this.selectedId)) {
+          this.selectedId = list[0].id;
+        }
+      },
+    },
+  },
+  created() {
+    this.$store.dispatch('users/init');
+  },
+  methods: {
+    initials, colorFor, age, formatDate,
+    address(u) {
+      const a = u.address || {};
+      return [a.street && `${a.street} ${a.number || ''}`.trim(), a.city, a.zipCode].filter(Boolean).join(', ') || '—';
+    },
+    select(u) { this.selectedId = u.id; this.mode = 'view'; this.confirmDelete = false; },
+    startAdd() {
+      this.form = blank();
+      if (this.current) this.form.center_ids = [this.current.id];
+      this.mode = 'add';
+    },
+    startEdit() {
+      const u = this.selected;
+      this.form = {
+        ...blank(), ...u,
+        address: { ...blank().address, ...(u.address || {}) },
+        center_ids: u.centers.map(c => c.id),
       };
+      this.mode = 'edit';
     },
-    computed: {
-      h3() {
-        let h3 = "";
-        if (this.mode == "see") h3 = "Просмотр";
-        if (this.mode == "add") h3 = "Добавление";
-        if (this.mode == "edit") h3 = "Редактирование";
-        return h3;
-      },
-
-      currentCenter(){
-        return this.$store.state.centers.currentCenter
-      }
+    cancel() { this.mode = 'view'; },
+    async save() {
+      const action = this.mode === 'add' ? 'users/add' : 'users/edit';
+      const saved = await this.$store.dispatch(action, this.form);
+      if (saved) { this.selectedId = saved.id; this.mode = 'view'; }
     },
-    async created() {
-      await this.$store.dispatch("users/initUsers");
-      this.$store.state.users.users
-
-
+    async removeClient() {
+      if (!this.confirmDelete) { this.confirmDelete = true; return; }
+      const ok = await this.$store.dispatch('users/remove', this.selected);
+      if (ok) { this.selectedId = this.filtered[0]?.id ?? null; this.confirmDelete = false; }
     },
-    methods: {
-      setCurrentUser(user) {
-        this.mode = "see";
-        this.currentUser.init(user);
-        this.currentUser.setShow(true);
-        this.isEdit = true
-      },
-      edit() {
-        this.mode = "edit";
-        this.currentUser.setShow(true);
-      },
-      add() {
-        this.mode = "add";
-        this.currentUser.clear();
-        this.currentUser.setShow(true);
-        this.isEdit = false
-      },
-      async saveOrEditUser() {
-        if(this.mode == 'edit')
-         await this.$store.dispatch("users/edit",this.currentUser);
-        if(this.mode == 'add')
-         await this.$store.dispatch("users/add",this.currentUser);
-        this.currentUser.clear();
-        this.currentUser.setShow(false);
-        this.isEdit = false
-        this.mode = "see";
-      },
-    },
-  };
+  },
+};
 </script>
-
-<style scope>
-  .disabled {
-    opacity: 0.5;
-    pointer-events: none;
-  }
-  .but-delete{
-    position: absolute;
-    left:70%;
-    top:50%;
-    border:none;
-    border:1px solid grey;
-    border-radius:10px;
-    width:200px;
-    height:35px;
-    background: white;
-    color:red;
-  }
-</style>

@@ -1,122 +1,127 @@
 <template>
-
-  <div class="bottom-menu">
-
-    <div @click="add" class="for-popup-service"><i class="fas fa-puzzle-piece"></i>добавить</div>
-    <div @click="edit" class="for-popup-service" :class="{ disabled: !isEdit }"><i class="fas fa-puzzle-piece"></i>редактировать</div>
-    <div class="delete-service" @click="remove"><i class="fas fa-trash-alt"></i>удалить</div>
-  </div>
-
-
-
-
- 
-  <div class="left left-li scroll">
-    <table class="service-list">
-      <tr  @click="setCurrentService(service)" v-for="(service, index) in $store.state.services.services"
-           :key="index"><td><i class="far fa-bookmark"></i> {{service.name}}</td> <td>{{service.during}}</td> <td>{{service.cost}}</td> <td><i class="fas fa-pencil-alt"></i></td></tr>
-
-    </table>
-  </div>
-  <div class="right service-right" v-show="currentService.show">
-    <h3>{{ h3 }}</h3>
-    <div class="form-red service-form">
-      <form id="service-form">
-        <div class="mb-3">
-          <label for="l1" class="form-label">название услуги</label>
-          <input :disabled="mode == 'see'" type="text" class="form-control name-service" id="l1" aria-describedby="emailHelp" placeholder="название услуги" v-model="currentService.name">
+  <div>
+    <div class="toolbar">
+      <div class="toolbar-left">
+        <div class="search" style="width: 300px">
+          <font-awesome-icon icon="search" />
+          <input class="input" v-model="query" placeholder="Search services" />
         </div>
-        <div class="mb-3">
-          <label for="l2" class="form-label">Длительность услуги</label>
-          <input :disabled="mode == 'see'" type="number" class="form-control time-service" id="l2" placeholder="Длительность услуги" v-model="currentService.during">
-        </div>
-        <div class="mb-3">
-          <label for="l3" class="form-label">Стоимость услуги</label>
-          <input :disabled="mode == 'see'" type="text" class="form-control price-service" id="l3" placeholder="Стоимость услуги" v-model="currentService.cost">
-        </div>
-        <div class="mb-3">
-          <label for="exampleColorInput" class="form-label">Выберите цвет услуги</label>
-          <input :disabled="mode == 'see'" type="color" class="form-control form-control-color color-edit" id="exampleColorInput" v-model="currentService.color" title="Выберите цвет услуги">
-        </div>
-         <button @click="saveOrEditService" v-show="mode == 'edit' || mode == 'add'">
-          {{ mode == "edit" ? "Сохранить" : "Добавить" }}
-        </button>
-
-      </form>
-
+      </div>
+      <div class="toolbar-right">
+        <button class="btn btn-primary" @click="startAdd"><font-awesome-icon icon="plus" /> New service</button>
+      </div>
     </div>
 
-  </div>
+    <div class="layout-svc">
+      <div class="card">
+        <table class="table">
+          <thead>
+            <tr><th>Service</th><th>Duration</th><th class="num">Price</th><th style="width:60px"></th></tr>
+          </thead>
+          <tbody>
+            <tr v-for="s in filtered" :key="s.id" :class="{ active: form.id === s.id && mode === 'edit' }" @click="startEdit(s)">
+              <td>
+                <div style="display:flex; align-items:center; gap:12px">
+                  <span class="swatch" :style="{ background: s.color }"></span>
+                  <b>{{ s.name }}</b>
+                </div>
+              </td>
+              <td class="muted"><font-awesome-icon icon="clock" class="faint" /> {{ duration(s.during) }}</td>
+              <td class="num"><b>{{ money(s.cost) }}</b></td>
+              <td><button class="icon-btn" title="Edit"><font-awesome-icon icon="pen" /></button></td>
+            </tr>
+            <tr v-if="!filtered.length"><td colspan="4" class="empty">No services found</td></tr>
+          </tbody>
+        </table>
+      </div>
 
+      <div class="card card-pad" v-if="mode">
+        <div class="profile-head" style="justify-content:space-between">
+          <h2>{{ mode === 'add' ? 'New service' : 'Edit service' }}</h2>
+          <button class="icon-btn" @click="mode = null"><font-awesome-icon icon="times" /></button>
+        </div>
+        <form @submit.prevent="save">
+          <label class="field"><span>Name *</span><input class="input" v-model="form.name" required /></label>
+          <div class="form-grid">
+            <label class="field"><span>Duration, min *</span><input class="input" type="number" min="5" step="5" v-model="form.during" required /></label>
+            <label class="field"><span>Price, ₴ *</span><input class="input" type="number" min="0" v-model="form.cost" required /></label>
+          </div>
+          <div class="field">
+            <span>Calendar color</span>
+            <div class="colors">
+              <button v-for="c in colors" :key="c" type="button" class="color" :class="{ on: form.color === c }"
+                      :style="{ background: c }" @click="form.color = c"></button>
+              <input type="color" v-model="form.color" class="color-input" title="Custom color" />
+            </div>
+          </div>
+
+          <div class="preview">
+            <span class="swatch" :style="{ background: form.color }"></span>
+            <div>
+              <b>{{ form.name || 'Service name' }}</b>
+              <div class="faint">{{ duration(form.during) }} · {{ money(form.cost) }}</div>
+            </div>
+          </div>
+
+          <div class="form-actions">
+            <button v-if="mode === 'edit'" type="button" class="btn btn-danger" style="margin-right:auto" @click="remove">
+              <font-awesome-icon icon="trash-alt" /> {{ confirmDelete ? 'Confirm' : 'Delete' }}
+            </button>
+            <button type="button" class="btn" @click="mode = null">Cancel</button>
+            <button class="btn btn-primary">{{ mode === 'add' ? 'Create' : 'Save' }}</button>
+          </div>
+        </form>
+      </div>
+
+      <div class="card empty" v-else>
+        <font-awesome-icon icon="spa" />
+        <div>Select a service to edit it,<br />or create a new one</div>
+      </div>
+    </div>
+  </div>
 </template>
 
 <script>
-import Service from "../../models/service";
+import { money, duration } from '../../utils';
 
-// <---------дописать сервис сервис remove -------->
+const colors = ['#e07a5f', '#3d405b', '#81b29a', '#f2cc8f', '#5e60ce', '#48bfe3', '#db2777', '#0f766e'];
 
 export default {
-    data () {
-        return {
-          currentService:new Service({}),
-          mode: "see",
-          isEdit:false,
-        }
+  data() {
+    return { query: '', mode: null, form: {}, colors, confirmDelete: false };
+  },
+  computed: {
+    filtered() {
+      const q = this.query.trim().toLowerCase();
+      const all = this.$store.state.services.items;
+      return q ? all.filter(s => s.name.toLowerCase().includes(q)) : all;
     },
-    computed:{
-      h3() {
-        let h3 = "";
-        if (this.mode == "see") h3 = "Просмотр";
-        if (this.mode == "add") h3 = "Добавление";
-        if (this.mode == "edit") h3 = "Редактирование";
-        return h3;
-      }
+  },
+  created() {
+    this.$store.dispatch('services/init');
+  },
+  methods: {
+    money, duration,
+    startAdd() { this.form = { name: '', during: 60, cost: '', color: colors[0] }; this.mode = 'add'; this.confirmDelete = false; },
+    startEdit(s) { this.form = { ...s }; this.mode = 'edit'; this.confirmDelete = false; },
+    async save() {
+      const saved = await this.$store.dispatch(this.mode === 'add' ? 'services/add' : 'services/edit', this.form);
+      if (saved) this.mode = null;
     },
-    async created () {
-      await this.$store.dispatch("services/initServices");
+    async remove() {
+      if (!this.confirmDelete) { this.confirmDelete = true; return; }
+      if (await this.$store.dispatch('services/remove', this.form)) this.mode = null;
     },
-    methods: {
-      setCurrentService(service){
-        this.currentService.init(service);
-        this.mode = "see";
-        this.currentService.setShow(true);
-        this.isEdit = true
-      },
-      edit() {
-        this.mode = "edit";
-        this.currentService.setShow(true);
-      },
-      add() {
-        this.mode = "add";
-        this.currentService.clear();
-        this.currentService.setShow(true);
-        this.isEdit = false
-      },
-      async remove() {
-        this.mode = "remove";
-        this.currentService.setShow(false);
-        this.isEdit = false
-        await this.$store.dispatch("services/remove",this.currentService);
-      },
-      async saveOrEditService(){
-        if(this.mode == 'edit')
-          await this.$store.dispatch("services/edit",this.currentService);
-
-        if(this.mode == 'add')
-          await this.$store.dispatch("services/add",this.currentService);
-        this.currentService.clear();
-        this.currentService.setShow(false);
-        this.isEdit = false
-        this.mode = "see";
-      }
-
-    }
+  },
 };
 </script>
 
-<style>
-  .disabled {
-    opacity: 0.5;
-    pointer-events: none;
-  }
+<style scoped>
+.layout-svc { display: grid; grid-template-columns: 1fr 380px; gap: 20px; align-items: start; }
+.colors { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.color { width: 28px; height: 28px; border-radius: 8px; border: 2px solid #fff; box-shadow: 0 0 0 1px var(--border); cursor: pointer; }
+.color.on { box-shadow: 0 0 0 2px var(--text); }
+.color-input { width: 34px; height: 30px; border: none; padding: 0; background: none; cursor: pointer; }
+.preview { display: flex; gap: 12px; align-items: center; padding: 14px; border-radius: 12px; background: var(--surface-2); border: 1px solid var(--border); margin: 4px 0 18px; }
+@media (max-width: 1200px) { .layout-svc { grid-template-columns: 1fr; } }
 </style>

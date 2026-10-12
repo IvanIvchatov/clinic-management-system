@@ -1,51 +1,111 @@
 <template>
-    <div>
-     	<div class="background"></div>
-			<div class="logo"><img src="../assets/logo.png" alt="logo"></div>
-			<form @submit.prevent="handleSubmit">
-				<div class="form">
-							<div class="title">ВХОД</div>
-								<img src="../assets/venzil.png" alt="venzil">
-								<input type="text" v-model="username" name="username" class="login" :class="{ 'is-invalid': submitted && !username }" placeholder="email">
-								<div v-show="submitted && !username" class="invalid-feedback">Username is required</div>
-								<input  type="password" v-model="password" name="password" class="password" placeholder="password" :class="{ 'is-invalid': submitted && !password }">
-								<div v-show="submitted && !password" class="invalid-feedback">Password is required</div>
-								<button :disabled="loggingIn">ВХОД</button>
-								<img v-show="loggingIn" src="data:image/gif;base64,R0lGODlhEAAQAPIAAP///wAAAMLCwkJCQgAAAGJiYoKCgpKSkiH/C05FVFNDQVBFMi4wAwEAAAAh/hpDcmVhdGVkIHdpdGggYWpheGxvYWQuaW5mbwAh+QQJCgAAACwAAAAAEAAQAAADMwi63P4wyklrE2MIOggZnAdOmGYJRbExwroUmcG2LmDEwnHQLVsYOd2mBzkYDAdKa+dIAAAh+QQJCgAAACwAAAAAEAAQAAADNAi63P5OjCEgG4QMu7DmikRxQlFUYDEZIGBMRVsaqHwctXXf7WEYB4Ag1xjihkMZsiUkKhIAIfkECQoAAAAsAAAAABAAEAAAAzYIujIjK8pByJDMlFYvBoVjHA70GU7xSUJhmKtwHPAKzLO9HMaoKwJZ7Rf8AYPDDzKpZBqfvwQAIfkECQoAAAAsAAAAABAAEAAAAzMIumIlK8oyhpHsnFZfhYumCYUhDAQxRIdhHBGqRoKw0R8DYlJd8z0fMDgsGo/IpHI5TAAAIfkECQoAAAAsAAAAABAAEAAAAzIIunInK0rnZBTwGPNMgQwmdsNgXGJUlIWEuR5oWUIpz8pAEAMe6TwfwyYsGo/IpFKSAAAh+QQJCgAAACwAAAAAEAAQAAADMwi6IMKQORfjdOe82p4wGccc4CEuQradylesojEMBgsUc2G7sDX3lQGBMLAJibufbSlKAAAh+QQJCgAAACwAAAAAEAAQAAADMgi63P7wCRHZnFVdmgHu2nFwlWCI3WGc3TSWhUFGxTAUkGCbtgENBMJAEJsxgMLWzpEAACH5BAkKAAAALAAAAAAQABAAAAMyCLrc/jDKSatlQtScKdceCAjDII7HcQ4EMTCpyrCuUBjCYRgHVtqlAiB1YhiCnlsRkAAAOwAAAAAAAAAAAA==" />
-								<div class="message">
-							</div>
-				</div>
-			</form>
-    </div>
+  <div class="auth">
+    <section class="auth-hero">
+      <div class="brand">
+        <div class="brand-mark">BL</div>
+        <div>
+          <div class="brand-name">Beauty Lab</div>
+          <div class="brand-sub">Clinic management</div>
+        </div>
+      </div>
+
+      <div class="hero-copy">
+        <h1>Everything your clinic network needs, in one place.</h1>
+        <p>Clients, services, staff and locations — managed from a single admin panel.</p>
+        <ul>
+          <li><font-awesome-icon icon="users" /> Client records with contacts and addresses</li>
+          <li><font-awesome-icon icon="spa" /> Service catalog with prices and durations</li>
+          <li><font-awesome-icon icon="hospital" /> Multiple centers, one dashboard</li>
+        </ul>
+      </div>
+
+      <div class="hero-foot">Laravel REST API · Vue 3 SPA · JWT</div>
+    </section>
+
+    <section class="auth-form">
+      <form @submit.prevent="handleSubmit" class="form-box">
+        <h2>Welcome back</h2>
+        <p class="muted">Sign in to your admin account</p>
+
+        <label class="field">
+          <span>Email</span>
+          <input class="input" type="email" v-model="username" placeholder="you@clinic.com" autocomplete="username" />
+        </label>
+        <div v-if="submitted && !username" class="err">Email is required</div>
+
+        <label class="field">
+          <span>Password</span>
+          <input class="input" type="password" v-model="password" placeholder="••••••••" autocomplete="current-password" />
+        </label>
+        <div v-if="submitted && !password" class="err">Password is required</div>
+
+        <button class="btn btn-primary btn-block" :disabled="loggingIn">
+          {{ loggingIn ? 'Signing in…' : 'Sign in' }}
+          <font-awesome-icon v-if="!loggingIn" icon="arrow-right" />
+        </button>
+
+        <div class="demo">
+          <font-awesome-icon icon="lock" />
+          <span>Demo account: <b>admin@clinic.test</b> / <b>password</b></span>
+        </div>
+      </form>
+    </section>
+  </div>
 </template>
 
 <script>
 export default {
-    data () {
-        return {
-            username: '',
-            password: '',
-            submitted: false
-        }
-    },
-    computed: {
-        loggingIn () {
-            return this.$store.state.authentication.status.loggingIn;
-        }
-    },
-    created () {
-        // reset login status
-        this.$store.dispatch('authentication/logout');
-    },
-    methods: {
-        handleSubmit () {
-            this.submitted = true;
-            const { username, password } = this;
-            const { dispatch } = this.$store;
-            if (username && password) {
-                dispatch('authentication/login', { username, password });
-            }
-        }
+  data() {
+    return { username: '', password: '', submitted: false };
+  },
+  computed: {
+    loggingIn() {
+      return this.$store.state.authentication.status.loggingIn;
     }
+  },
+  created() {
+    this.$store.dispatch('authentication/logout');
+  },
+  methods: {
+    handleSubmit() {
+      this.submitted = true;
+      const { username, password } = this;
+      if (username && password) {
+        this.$store.dispatch('authentication/login', { username, password });
+      }
+    }
+  }
 };
 </script>
+
+<style scoped>
+.auth { display: grid; grid-template-columns: 1.1fr 1fr; min-height: 100vh; }
+.auth-hero {
+  background:
+    radial-gradient(circle at 85% 15%, rgba(94, 234, 212, .22), transparent 40%),
+    radial-gradient(circle at 10% 90%, rgba(20, 184, 166, .28), transparent 45%),
+    linear-gradient(160deg, #0b1f24 0%, #0f3b3a 100%);
+  color: #e2f2f0; padding: 44px 56px; display: flex; flex-direction: column;
+}
+.auth-hero .brand { padding: 0; }
+.hero-copy { margin: auto 0; max-width: 470px; }
+.hero-copy h1 { font-size: 36px; line-height: 1.15; color: #fff; letter-spacing: -.02em; }
+.hero-copy p { color: #9fc1bc; font-size: 16px; margin: 16px 0 28px; }
+.hero-copy ul { list-style: none; padding: 0; margin: 0; }
+.hero-copy li { display: flex; align-items: center; gap: 12px; padding: 9px 0; color: #cfe6e2; }
+.hero-copy li svg { color: #5eead4; width: 16px; }
+.hero-foot { color: #6f9690; font-size: 13px; }
+
+.auth-form { display: grid; place-items: center; padding: 40px; background: var(--surface); }
+.form-box { width: 100%; max-width: 380px; }
+.form-box h2 { font-size: 26px; }
+.form-box .muted { margin: 6px 0 28px; }
+.btn-block { width: 100%; justify-content: center; height: 44px; margin-top: 8px; }
+.err { color: var(--danger); font-size: 12.5px; margin: -8px 0 12px; }
+.demo {
+  margin-top: 22px; padding: 12px 14px; border-radius: 10px; background: var(--surface-2);
+  border: 1px dashed var(--border); color: var(--text-2); font-size: 13px; display: flex; gap: 8px; align-items: center;
+}
+.demo svg { color: var(--text-3); }
+@media (max-width: 900px) { .auth { grid-template-columns: 1fr; } .auth-hero { display: none; } }
+</style>

@@ -1,19 +1,16 @@
-
 import { createStore } from "vuex";
 import { authentication } from './authentication.module';
-import { users } from './users.module';
 import { centers } from './centers.module';
-import { services } from './service.module';
-import { collaborators  } from './collaborator.module';
+import { resourceModule } from './resource.module';
+import { userService, serviceService, collaboratorService } from '../services';
 
 const store = createStore({
   modules: {
     authentication,
-    users,
     centers,
-    services,
-    collaborators
-
+    users: resourceModule(userService, 'Client'),
+    services: resourceModule(serviceService, 'Service'),
+    collaborators: resourceModule(collaboratorService, 'Employee'),
   },
 });
 

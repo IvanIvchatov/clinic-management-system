@@ -1,0 +1,8 @@
+{
+  "name": "clinic-screenshots",
+  "private": true,
+  "type": "module",
+  "description": "Takes README screenshots of the running app (uses the Edge/Chrome already installed)",
+  "scripts": { "shots": "node screenshots.mjs" },
+  "dependencies": { "playwright-core": "1.48.2" }
+}

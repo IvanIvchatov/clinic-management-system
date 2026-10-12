@@ -49,9 +49,9 @@ class DatabaseSeeder extends Seeder
         foreach ([
             ['Olena Kovalenko', '1990-04-12', 'Senior hair stylist, 10 years of experience'],
             ['Iryna Shevchenko', '1994-09-03', 'Cosmetologist, facial treatments'],
-            ['Mariia Bondarenko', '1997-01-25', 'Nail artist'],
-            ['Andrii Melnyk', '1988-06-17', 'Massage therapist'],
-            ['Kateryna Tkachenko', '1995-11-30', 'Laser specialist'],
+            ['Mariia Bondarenko', '1997-01-25', 'Nail artist, manicure and nail design'],
+            ['Andrii Melnyk', '1988-06-17', 'Massage therapist, classic and sports massage'],
+            ['Kateryna Tkachenko', '1995-11-30', 'Laser specialist, laser hair removal'],
         ] as [$name, $birth, $bio]) {
             Collaborator::create(compact('name', 'birth', 'bio'));
         }
@@ -69,7 +69,7 @@ class DatabaseSeeder extends Seeder
             ['Yuliia', 'Kravchenko', 'Serhiivna', '+380 93 333 44 55', '2001-10-21', 'Kyiv', 'Antonovycha St', '16'],
             ['Oleksandr', 'Moroz', 'Petrovych', '+380 66 444 55 66', '1992-03-03', 'Kyiv', 'Bohdana Khmelnytskoho St', '9'],
             ['Sofiia', 'Lysenko', 'Andriivna', '+380 97 555 66 77', '1999-12-09', 'Kyiv', 'Saksahanskoho St', '30'],
-            ['Viktoriia', 'Rudenko', 'Mykolaivna', '+380 63 666 77 88', '1987-05-27', 'Kyiv', 'Heroiv Stalinhrada Ave', '11'],
+            ['Viktoriia', 'Rudenko', 'Mykolaivna', '+380 63 666 77 88', '1987-05-27', 'Kyiv', 'Heroiv Dnipra St', '11'],
         ] as $i => [$name, $second, $patronymic, $phone, $birthday, $city, $street, $number]) {
             $address = Address::create(['city' => $city, 'street' => $street, 'number' => $number, 'zipCode' => '0' . (4000 + $i * 11)]);
             $client = User::create([

@@ -1,7 +1,6 @@
-export default function guest ({ next, store }){
-    if(store.state.authentication.status.loggedIn){
-        return next('dashboard')
-    }
-   
-    return next()
-   }
+export default function guest({ next, store }) {
+  if (store.state.authentication.status.loggedIn) {
+    return next('/');
+  }
+  return next();
+}

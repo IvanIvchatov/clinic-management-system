@@ -12,7 +12,13 @@ class UserController extends BaseController
 {
     public function index()
     {
-        $users = User::with('address','centers.address')->get();
+        // clients only: staff accounts with ROLE_ADMIN are not listed
+        $users = User::with('address', 'centers.address')
+            ->whereDoesntHave('roles', function ($q) {
+                $q->where('name', 'ROLE_ADMIN');
+            })
+            ->orderBy('secondName')
+            ->get();
         return $this->sendResponse(UserResource::collection($users), 'Users get.');
     }
     
@@ -31,8 +37,11 @@ class UserController extends BaseController
         }
         $input['password'] = bcrypt($input['password'] ?? \Illuminate\Support\Str::random(16));
         $user = User::create($input);
-        
-        return $this->sendResponse(new UserResource($user), 'Post created.');
+        if (isset($input['center_ids']) && is_array($input['center_ids'])) {
+            $user->centers()->sync($input['center_ids']);
+        }
+
+        return $this->sendResponse(new UserResource($user->load('address', 'centers')), 'User created.');
     }
    
     public function show($id)
@@ -75,13 +84,18 @@ class UserController extends BaseController
         $user->phone = $input['phone'] ?? $user->phone;
         $user->secondName = $input['secondName'] ?? $user->secondName;
         $user->save();
-        
+        if (isset($input['center_ids']) && is_array($input['center_ids'])) {
+            $user->centers()->sync($input['center_ids']);
+        }
+
         return $this->sendResponse(new UserResource($user->load('address', 'centers')), 'User updated.');
     }
    
     public function destroy(User $user)
     {
+        $user->centers()->detach();
+        $user->roles()->detach();
         $user->delete();
-        return $this->sendResponse([], 'Post deleted.');
+        return $this->sendResponse([], 'User deleted.');
     }
 }

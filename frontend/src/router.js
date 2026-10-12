@@ -1,116 +1,40 @@
 import { createWebHistory, createRouter } from "vue-router";
 import Home from './components/Home'
 import Login from './components/Login'
+import Dashboard from './components/pages/Dashboard'
 import Clients from './components/pages/Clients'
-import Descriptions from './components/pages/Descriptions'
 import Services from './components/pages/Services'
-import Collaborator from './components/pages/Collaborator'
-import Salary from './components/pages/Salary'
-import Settings from './components/pages/Settings'
-import CashBox from './components/pages/Cashbox'
+import Staff from './components/pages/Staff'
+import Centers from './components/pages/Centers'
 import store from './store'
 import guest from './middleware/guest'
 import auth from './middleware/auth'
 
+const page = (path, component, title, subtitle) => ({
+  path, component, meta: { middleware: [auth], title, subtitle },
+});
+
 const routes = [
   {
     path: '/', component: Home,
-    redirect: '/clients',
+    redirect: '/dashboard',
     children: [
-      {
-        path: 'clients',
-        component: Clients,
-        meta: {
-          middleware: [
-            auth
-          ]
-        }
-      },
-      {
-        path: 'descriptions',
-        component: Descriptions,
-        meta: {
-          middleware: [
-            auth
-          ]
-        }
-      },
-      {
-        path: 'services',
-        component: Services,
-        meta: {
-          middleware: [
-            auth
-          ]
-        }
-      },
-      {
-        path: 'employers',
-        component: Collaborator,
-        meta: {
-          middleware: [
-            auth
-          ]
-        }
-      },
-      {
-        path: 'salary',
-        component: Salary,
-        meta: {
-          middleware: [
-            auth
-          ]
-        }
-      },
-      {
-        path: 'cashbox',
-        component: CashBox,
-        meta: {
-          middleware: [
-            auth
-          ]
-        }
-      },
-      {
-        path: 'settings',
-        component: Settings,
-        meta: {
-          middleware: [
-            auth
-          ]
-        }
-      },
+      page('dashboard', Dashboard, 'Dashboard', 'Overview of your clinic network'),
+      page('clients', Clients, 'Clients', 'Client records and contact details'),
+      page('services', Services, 'Services', 'Price list and service catalog'),
+      page('staff', Staff, 'Staff', 'Specialists working in your centers'),
+      page('centers', Centers, 'Centers', 'Locations of your clinic network'),
     ]
   },
-  {
-    path: '/login', component: Login,
-    meta: {
-      middleware: [
-        guest
-      ]
-    }
-  },
+  { path: '/login', component: Login, meta: { middleware: [guest] } },
+  { path: '/:pathMatch(.*)*', redirect: '/' },
 ];
 
-const router = createRouter({
-  history: createWebHistory(),
-  routes,
-});
+const router = createRouter({ history: createWebHistory(), routes });
 
 router.beforeEach((to, from, next) => {
-  if (!to.meta.middleware) {
-      return next()
-  }
-  const middleware = to.meta.middleware
-  const context = {
-      to,
-      from,
-      next,
-      store
-  }
-  return middleware[0]({
-      ...context
-  })
-})
+  if (!to.meta.middleware) return next();
+  return to.meta.middleware[0]({ to, from, next, store });
+});
 
 export default router;

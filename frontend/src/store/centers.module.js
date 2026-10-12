@@ -1,24 +1,14 @@
 import { centerService } from '../services';
-// import { notify } from "@kyvg/vue3-notification";
+import { resourceModule } from './resource.module';
+
+const base = resourceModule(centerService, 'Center');
+
+// Centers also hold the currently selected center (filter in the top bar)
 export const centers = {
-    namespaced: true,
-    state: () => ({
-        centers: [],
-        message:'',
-        currentCenter:null,
-    }),
-    actions:{
-        async initCenters({commit}){
-            const centers =await centerService.getAllCenters()
-            commit("setCenters",centers)
-        }
-    },
-    mutations: {
-        setCenters(state,centers){
-            state.centers = centers
-        },
-        setCurrentCenter(state,center){
-            state.currentCenter = center
-        }
-    }
-}
+  ...base,
+  state: () => ({ ...base.state(), current: null }),
+  mutations: {
+    ...base.mutations,
+    setCurrent(state, center) { state.current = center; },
+  },
+};
