@@ -3,7 +3,7 @@
 namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
-use Illuminate\Support\Facades\Schema;
+use Illuminate\Database\Schema\Builder;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -24,6 +24,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot()
     {
-        Schema::defaultStringLength(191);
+        // static call: does not open a DB connection (artisan/composer work without a database)
+        Builder::defaultStringLength(191);
     }
 }

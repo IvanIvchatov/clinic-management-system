@@ -48,9 +48,12 @@ if (-not (Test-Path $composer)) {
 Step 'Backend: installing PHP dependencies (a few minutes)'
 Set-Location (Join-Path $root 'backend')
 if (-not (Test-Path '.env')) { Copy-Item '.env.example' '.env' }
-# SQLite file must exist before composer runs artisan package:discover
-$db = Join-Path (Get-Location) 'database\database.sqlite'
+# SQLite database lives in the ASCII tools folder (PHP + Cyrillic paths = trouble)
+$db = Join-Path $tools 'database.sqlite'
 if (-not (Test-Path $db)) { New-Item -ItemType File -Path $db | Out-Null }
+$envLines = Get-Content '.env' | Where-Object { $_ -notmatch '^DB_DATABASE=' }
+$envLines += ('DB_DATABASE=' + $db)
+[IO.File]::WriteAllLines((Join-Path (Get-Location) '.env'), [string[]]$envLines, (New-Object Text.UTF8Encoding $false))
 php $composer update --no-interaction --with-all-dependencies
 if ($LASTEXITCODE -ne 0) { throw 'composer update failed' }
 
