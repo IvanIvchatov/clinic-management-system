@@ -31,7 +31,8 @@ await page.fill('input[type=email]', 'admin@clinic.test');
 await page.fill('input[type=password]', 'password');
 await page.click('button:has-text("Sign in")');
 await page.waitForURL('**/dashboard');
-await page.waitForSelector('.stat-value');
+await page.waitForSelector('.svc-row');           // services loaded
+await page.waitForLoadState('networkidle');       // staff & clients loaded too
 await shot('02-dashboard');
 
 await page.goto(`${APP}/clients`, { waitUntil: 'networkidle' });
