@@ -4,7 +4,9 @@
 #   winget install -e --id OpenJS.NodeJS.LTS
 $ErrorActionPreference = 'Stop'
 $root = $PSScriptRoot
-$tools = Join-Path $root 'tools'
+# PHP can't load extensions/ini from paths with non-ASCII chars (e.g. C:\Users\Іван),
+# so tools live in an ASCII folder: C:\Users\Public\clinic-tools
+$tools = Join-Path $env:PUBLIC 'clinic-tools'
 New-Item -ItemType Directory -Force -Path $tools | Out-Null
 
 function Step($t) { Write-Host "`n==> $t" -ForegroundColor Cyan }
@@ -18,15 +20,24 @@ Write-Host "PHP: $phpBin"
 Write-Host "Node: $(node -v)"
 
 Step 'Writing project-local php.ini (does not touch your system PHP config)'
+$phpLink = Join-Path $tools 'php'
+if (-not (Test-Path $phpLink)) { New-Item -ItemType Junction -Path $phpLink -Target $phpDir | Out-Null }
+$extDir = Join-Path $phpLink 'ext'
+Write-Host "Extensions dir: $extDir"
 $ini = Get-Content (Join-Path $phpDir 'php.ini-development')
-$ini = $ini -replace '^;\s*extension_dir\s*=\s*"ext"', ('extension_dir = "' + (Join-Path $phpDir 'ext') + '"')
+$ini = $ini | Where-Object { $_ -notmatch '^\s*extension_dir\s*=' }
 foreach ($ext in 'openssl','pdo_sqlite','sqlite3','mbstring','fileinfo','curl','zip') {
     $ini = $ini -replace "^;\s*extension=$ext\s*$", "extension=$ext"
 }
+$ini += ('extension_dir = "' + $extDir + '"')
 $ini += 'memory_limit = 1G'
-Set-Content -Path (Join-Path $tools 'php.ini') -Value $ini -Encoding ASCII
+[IO.File]::WriteAllLines((Join-Path $tools 'php.ini'), [string[]]$ini, (New-Object Text.UTF8Encoding $false))
 $env:PHPRC = $tools
-php -m | Select-String -Pattern 'pdo_sqlite|openssl|mbstring' | ForEach-Object { Write-Host "  ext: $_" }
+$mods = (& php -m) -join "`n"
+foreach ($m in 'openssl','pdo_sqlite','mbstring') {
+    if ($mods -notmatch "(?m)^$m\s*$") { throw "PHP extension '$m' did not load. Check $tools\php.ini (extension_dir = $extDir)" }
+    Write-Host "  ext ok: $m"
+}
 
 Step 'Downloading Composer'
 $composer = Join-Path $tools 'composer.phar'
