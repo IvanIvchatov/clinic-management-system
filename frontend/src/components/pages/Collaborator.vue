@@ -84,7 +84,6 @@ export default {
   },
   methods: {
     setCurrentCollaborator(collaborator){
-      debugger
       this.currentCollaborator.init(collaborator);
       this.mode = "see";
       this.currentCollaborator.setShow(true);
@@ -99,7 +98,6 @@ export default {
       this.currentCollaborator.clear();
       this.currentCollaborator.setShow(true);
       this.isEdit = false
-      debugger
     },
     remove() {
       this.mode = "remove";
@@ -108,7 +106,7 @@ export default {
     },
     async saveOrEditService(){
       if(this.mode == 'edit')
-        await this.$store.dispatch("сollaborators/edit",this.currentCollaborator);
+        await this.$store.dispatch("collaborators/edit",this.currentCollaborator);
 
       if(this.mode == 'add')
         await this.$store.dispatch("collaborators/add",this.currentCollaborator);
@@ -118,7 +116,7 @@ export default {
       this.mode = "see";
 
       if(this.mode == 'remove')
-        await this.$store.dispatch("collaborator/remove",this.currentCollaborator);
+        await this.$store.dispatch("collaborators/remove",this.currentCollaborator);
 
 
     }

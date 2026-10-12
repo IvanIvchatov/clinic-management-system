@@ -99,7 +99,6 @@ export default {
         await this.$store.dispatch("services/remove",this.currentService);
       },
       async saveOrEditService(){
-        debugger
         if(this.mode == 'edit')
           await this.$store.dispatch("services/edit",this.currentService);
 

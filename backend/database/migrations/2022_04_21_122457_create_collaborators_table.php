@@ -13,7 +13,7 @@ class CreateCollaboratorsTable extends Migration
      */
     public function up()
     {
-        Schema::create('flights', function (Blueprint $table) {
+        Schema::create('collaborators', function (Blueprint $table) {
             $table->id();
             $table->string('name');
             $table->string('birth');
@@ -29,6 +29,6 @@ class CreateCollaboratorsTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('flights');
+        Schema::dropIfExists('collaborators');
     }
 }

@@ -17,7 +17,8 @@ class Center extends Model
     protected $fillable = [
         'name',
         'phone',
-        'addition'
+        'addition',
+        'address_id'
     ];
 
     public function address()

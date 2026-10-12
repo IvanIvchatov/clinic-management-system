@@ -61,7 +61,7 @@ class User extends Authenticatable implements JWTSubject
     public function roles()
     {
         return $this
-            ->belongsToMany('App\Role')
+            ->belongsToMany(Role::class)
             ->withTimestamps();
     }
 
@@ -98,7 +98,7 @@ class User extends Authenticatable implements JWTSubject
 
     public function hasRole($role)
     {
-      if ($this->roles()->where(‘name’, $role)->first()) {
+      if ($this->roles()->where('name', $role)->first()) {
         return true;
       }
       return false;

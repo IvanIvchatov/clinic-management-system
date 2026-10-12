@@ -14,10 +14,10 @@ class AddSecondName extends Migration
     public function up()
     {
         Schema::table('users', function (Blueprint $table) {
-            $table->string('secondName');
-            $table->string('patronymic');
+            $table->string('secondName')->nullable();
+            $table->string('patronymic')->nullable();
             $table->date('birthday')->nullable();
-            $table->string('phone');
+            $table->string('phone')->nullable();
         });
     }
 

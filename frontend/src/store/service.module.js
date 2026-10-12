@@ -51,7 +51,6 @@ export const services = {
         },
 
         async edit({commit},service) {
-            debugger
             try{
                 const serviceData = await serviceService.edit(service)
                 commit('edit',serviceData)

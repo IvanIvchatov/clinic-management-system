@@ -26,8 +26,10 @@ class UserController extends BaseController
         if($validator->fails()){
             return $this->sendError($validator->errors(),[],500);       
         }
-        $address_id = Address::create($input['address'])->id;
-        $input['address_id'] = $address_id;
+        if (!empty($input['address'])) {
+            $input['address_id'] = Address::create($input['address'])->id;
+        }
+        $input['password'] = bcrypt($input['password'] ?? \Illuminate\Support\Str::random(16));
         $user = User::create($input);
         
         return $this->sendResponse(new UserResource($user), 'Post created.');
@@ -46,36 +48,35 @@ class UserController extends BaseController
     {
         
         $input = $request->all();
-        return $this->sendResponse($input,'123');
         $validator = Validator::make($input, [
-            'title' => 'required',
-            'description' => 'required'
+            'name' => 'required',
+            'email' => 'required|email'
         ]);
         if($validator->fails()){
             return $this->sendError($validator->errors(),[],500);       
         }
 
-        $address = Address::find($input['address']['id']);
+        $address = isset($input['address']['id']) ? Address::find($input['address']['id']) : null;
         if($address){
-            $address['city'] = $input['address']['id'];
+            $address['city'] = $input['address']['city'];
             $address['number'] = $input['address']['number'];
             $address['street'] = $input['address']['street'];
             $address['zipCode']  =$input['address']['zipCode'];
             $address->save();
-        }else{
+        }elseif(!empty($input['address'])){
            $address_id =  Address::create($input['address'])->id;
            $user->address_id = $address_id;
         }
 
-        $user->birthday = $input['birthday'];
+        $user->birthday = $input['birthday'] ?? $user->birthday;
         $user->email = $input['email'];
         $user->name = $input['name'];
-        $user->patronymic = $input['patronymic'];
-        $user->phone = $input['phone'];
-        $user->secondName = $input['secondName'];
+        $user->patronymic = $input['patronymic'] ?? $user->patronymic;
+        $user->phone = $input['phone'] ?? $user->phone;
+        $user->secondName = $input['secondName'] ?? $user->secondName;
         $user->save();
         
-        return $this->sendResponse(new UserResource($user), 'Post updated.');
+        return $this->sendResponse(new UserResource($user->load('address', 'centers')), 'User updated.');
     }
    
     public function destroy(User $user)

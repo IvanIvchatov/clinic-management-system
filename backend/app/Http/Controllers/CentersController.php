@@ -1,86 +1,76 @@
 <?php
-   
+
 namespace App\Http\Controllers;
-   
-// use Illuminate\Http\Request;
-// use Validator;
+
+use Illuminate\Http\Request;
+use Validator;
 use App\Models\Center;
-// use App\Models\Address;
+use App\Models\Address;
 use App\Http\Resources\Center as CenterResource;
-   
+
 class CentersController extends BaseController
 {
     public function index()
     {
-        $users = Center::with('address')->get();
-        return $this->sendResponse(CenterResource::collection($users), 'Centers get.');
+        $centers = Center::with('address')->get();
+        return $this->sendResponse(CenterResource::collection($centers), 'Centers get.');
     }
-    
-    // public function store(Request $request)
-    // {
-    //     $input = $request->all();
-    //     $validator = Validator::make($input, [
-    //         'name' => 'required',
-    //         'email' => 'required'
-    //     ]);
-    //     if($validator->fails()){
-    //         return $this->sendError($validator->errors(),[],500);       
-    //     }
-    //     $address_id = Address::create($input['address'])->id;
-    //     $input['address_id'] = $address_id;
-    //     $user = User::create($input);
-        
-    //     return $this->sendResponse(new UserResource($user), 'Post created.');
-    // }
-   
-    // public function show($id)
-    // {
-    //     $user = User::find($id);
-    //     if (is_null($user)) {
-    //         return $this->sendError('Post does not exist.',[],500);
-    //     }
-    //     return $this->sendResponse(new UserResource($user), 'Post fetched.');
-    // }
-    
-    // public function update(Request $request, User $user)
-    // {
-        
-    //     $input = $request->all();
-    //     return $this->sendResponse($input,'123');
-    //     $validator = Validator::make($input, [
-    //         'title' => 'required',
-    //         'description' => 'required'
-    //     ]);
-    //     if($validator->fails()){
-    //         return $this->sendError($validator->errors(),[],500);       
-    //     }
 
-    //     $address = Address::find($input['address']['id']);
-    //     if($address){
-    //         $address['city'] = $input['address']['id'];
-    //         $address['number'] = $input['address']['number'];
-    //         $address['street'] = $input['address']['street'];
-    //         $address['zipCode']  =$input['address']['zipCode'];
-    //         $address->save();
-    //     }else{
-    //        $address_id =  Address::create($input['address'])->id;
-    //        $user->address_id = $address_id;
-    //     }
+    public function store(Request $request)
+    {
+        $input = $request->all();
+        $validator = Validator::make($input, [
+            'name' => 'required',
+            'phone' => 'required',
+        ]);
+        if ($validator->fails()) {
+            return $this->sendError($validator->errors(), [], 422);
+        }
 
-    //     $user->birthday = $input['birthday'];
-    //     $user->email = $input['email'];
-    //     $user->name = $input['name'];
-    //     $user->patronymic = $input['patronymic'];
-    //     $user->phone = $input['phone'];
-    //     $user->secondName = $input['secondName'];
-    //     $user->save();
-        
-    //     return $this->sendResponse(new UserResource($user), 'Post updated.');
-    // }
-   
-    // public function destroy(User $user)
-    // {
-    //     $user->delete();
-    //     return $this->sendResponse([], 'Post deleted.');
-    // }
+        if (!empty($input['address'])) {
+            $input['address_id'] = Address::create($input['address'])->id;
+        }
+        $input['addition'] = $input['addition'] ?? '';
+
+        $center = Center::create($input);
+        return $this->sendResponse(new CenterResource($center->load('address')), 'Center created.');
+    }
+
+    public function show(Center $center)
+    {
+        return $this->sendResponse(new CenterResource($center->load('address')), 'Center fetched.');
+    }
+
+    public function update(Request $request, Center $center)
+    {
+        $input = $request->all();
+        $validator = Validator::make($input, [
+            'name' => 'required',
+            'phone' => 'required',
+        ]);
+        if ($validator->fails()) {
+            return $this->sendError($validator->errors(), [], 422);
+        }
+
+        if (!empty($input['address'])) {
+            if ($center->address) {
+                $center->address->update($input['address']);
+            } else {
+                $center->address_id = Address::create($input['address'])->id;
+            }
+        }
+
+        $center->name = $input['name'];
+        $center->phone = $input['phone'];
+        $center->addition = $input['addition'] ?? $center->addition;
+        $center->save();
+
+        return $this->sendResponse(new CenterResource($center->load('address')), 'Center updated.');
+    }
+
+    public function destroy(Center $center)
+    {
+        $center->delete();
+        return $this->sendResponse([], 'Center deleted.');
+    }
 }
